@@ -1,0 +1,161 @@
+import 'package:flutter/material.dart';
+import 'package:floraccess_app/features/users/presentation/widgets/user_form_dialog.dart';
+
+import '../../models/user.dart';
+import '../viewmodels/users_view_model.dart';
+
+class UserDetailsSheet {
+  static void show(
+    BuildContext context,
+    User user,
+    UsersViewModel usersViewModel,
+    void Function(String) showSnack,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => _Sheet(
+        user: user,
+        usersViewModel: usersViewModel,
+        showSnack: showSnack,
+      ),
+    );
+  }
+
+  static Future<void> deleteUser(
+    BuildContext context,
+    User user,
+    UsersViewModel usersViewModel,
+    void Function(String) showSnack,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Supprimer l\'utilisateur ?'),
+        content: Text(user.email),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final res = await usersViewModel.deleteUser(user.id.toString());
+    res.when(success: (_) => showSnack('Supprimé'), error: showSnack);
+  }
+}
+
+class _Sheet extends StatelessWidget {
+  const _Sheet({
+    required this.user,
+    required this.usersViewModel,
+    required this.showSnack,
+  });
+
+  final User user;
+  final UsersViewModel usersViewModel;
+  final void Function(String) showSnack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () async {
+                  final result = await UserFormDialog.show(context, initial: user);
+                  if (result == null) return;
+                  result.remove('email');
+                  final res = await usersViewModel.updateUser(user.id.toString(), result);
+                  res.when(success: (_) => showSnack('Utilisateur mis à jour'), error: showSnack);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => UserDetailsSheet.deleteUser(context, user, usersViewModel, showSnack),
+              ),
+            ],
+          ),
+          Text(user.pseudo, style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          _row('ID', Text(user.id.toString())),
+          _row('Email', Text(user.email)),
+          _row('Auth methods', Text(user.authMethodsId.toString())),
+          _row( 'Connecté',
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Tooltip(
+                message: user.isConnected ? 'Connecté' : 'Non connecté',
+                child: Icon(
+                  user.isConnected ? Icons.circle : Icons.circle_outlined,
+                  color: user.isConnected ? Colors.green : Colors.grey,
+                  size: 14,
+                ),
+              ),
+            ),
+          ),
+          _row('Email vérifié',
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Tooltip(
+                message: user.isVerifiedEmail ? 'Email vérifié' : 'Email non vérifié',
+                child: Icon(
+                  user.isVerifiedEmail ? Icons.verified : Icons.mail,
+                  color: user.isVerifiedEmail ? Colors.green : Colors.orange,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+          _row('Dernière IP', Text(user.lastIp ?? '-')),
+          _row('Connexion', Text(_formatDate(user.lastLogin))),
+          _row('Déconnexion', Text(_formatDate(user.lastLogoutAt))),
+          _row('Créé le', Text(_formatDate(user.createdAt))),
+          _row('Mis à jour le', Text(_formatDate(user.updatedAt))),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(String label, Widget child) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(width: 130, child: Text(label)),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '-';
+    /* format to DD Mounth YYYY HH:MM */
+    return '${date.day.toString().padLeft(2, '0')} '
+        '${_monthName(date.month)} '
+        '${date.year} '
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
+  }
+  
+  String _monthName(int month) {
+    const months = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+    return months[month - 1];
+  }
+}
