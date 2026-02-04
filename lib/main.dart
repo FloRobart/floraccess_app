@@ -36,6 +36,11 @@ void main() async {
     usersViewModel: usersViewModel,
   ).router;
 
+  apiClient.onUnauthorized = () async {
+    await appState.clearJwtToken();
+    router.go('/');
+  };
+
   runApp(FloraccessApp(appState: appState, router: router));
 }
 
