@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/result.dart';
 import '../../../../shared/app_state.dart';
 import '../../data/auth_repository.dart';
 import '../../../users/models/user.dart';
@@ -49,7 +48,7 @@ class AuthViewModel extends ChangeNotifier {
     _setLoading(true);
     final result = await authRepository.loginConfirm(
       email: email,
-      code: code,
+      code: code.trim().replaceAll(RegExp(r'\s+'), ''),
       requestToken: requestToken,
     );
     _setLoading(false);

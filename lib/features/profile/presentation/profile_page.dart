@@ -1,3 +1,4 @@
+import 'package:floraccess_app/config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -68,11 +69,11 @@ class _ProfilePageState extends State<ProfilePage> {
             }
           },
         ),
-        title: const Text('Mon Profil'),
+        title: Text(Config.appName),
       ),
       body: AnimatedBuilder(
         animation: widget.authViewModel,
-        builder: (_, __) {
+        builder: (_, _) {
           final profile = widget.authViewModel.profile;
           final error = widget.authViewModel.error;
           final isLoading = widget.authViewModel.isLoading;
@@ -405,8 +406,7 @@ class _ProfilePageState extends State<ProfilePage> {
       case ThemeMode.dark:
         return 'Sombre';
       case ThemeMode.system:
-      default:
-        return 'Auto';
+      return 'Auto';
     }
   }
 

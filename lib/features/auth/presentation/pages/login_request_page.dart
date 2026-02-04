@@ -63,7 +63,7 @@ class _LoginRequestPageState extends State<LoginRequestPage> {
                   const SizedBox(height: 16),
                   AnimatedBuilder(
                     animation: widget.authViewModel,
-                    builder: (_, __) => Column(
+                    builder: (_, _) => Column(
                       children: [
                         if (widget.authViewModel.error != null)
                           Text(
