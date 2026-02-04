@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:floraccess_app/config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -34,6 +35,7 @@ class _UsersPageState extends State<UsersPage> {
   void initState() {
     super.initState();
     widget.usersViewModel.load();
+    widget.authViewModel.loadProfile();
     _searchCtrl.text = widget.usersViewModel.search;
   }
 
@@ -47,11 +49,36 @@ class _UsersPageState extends State<UsersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Utilisateurs'),
+        title: Text(Config.appName),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => context.go('/profile'),
+          AnimatedBuilder(
+            animation: widget.authViewModel,
+            builder: (context, _) {
+              final profile = widget.authViewModel.profile;
+              final displayName = profile?.pseudo ?? profile?.email ?? '';
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: InkWell(
+                    onTap: () => context.go('/profile'),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        children: [
+                          if (displayName.isNotEmpty)
+                            Text(displayName),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.person),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+            },
           ),
         ],
       ),
