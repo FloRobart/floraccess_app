@@ -72,23 +72,36 @@ class _Sheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () async {
-                  final result = await UserFormDialog.show(context, initial: user);
-                  if (result == null) return;
-                  result.remove('email');
-                  final res = await usersViewModel.updateUser(user.id.toString(), result);
-                  res.when(success: (_) => showSnack('Utilisateur mis à jour'), error: showSnack);
-                },
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    user.pseudo,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => UserDetailsSheet.deleteUser(context, user, usersViewModel, showSnack),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      final result = await UserFormDialog.show(context, initial: user);
+                      if (result == null) return;
+                      result.remove('email');
+                      final res = await usersViewModel.updateUser(user.id.toString(), result);
+                      res.when(success: (_) => showSnack('Utilisateur mis à jour'), error: showSnack);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => UserDetailsSheet.deleteUser(context, user, usersViewModel, showSnack),
+                  ),
+                ],
               ),
             ],
           ),
-          Text(user.pseudo, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
           _row('ID', Text(user.id.toString())),
           _row('Email', Text(user.email)),
