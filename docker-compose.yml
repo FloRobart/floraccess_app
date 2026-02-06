@@ -16,6 +16,8 @@ services:
       - SETUID
     read_only: true
     user: "1800:1800"
+    volumes:
+      - ./.env:/usr/share/nginx/html/assets/.env:ro
     tmpfs:
       - /tmp:exec,nosuid,nodev,uid=1800,gid=1800
       - /run:rw,mode=0755,uid=1800,gid=1800
