@@ -3,14 +3,15 @@ services:
   floraccess-app-web:
     image: nginx:stable-alpine
     working_dir: /app
+    environment:
+      - FLUTTER_ENV=dev
     ports:
       - ${APP_PORT:-}:80
     volumes:
       - ./build/web:/usr/share/nginx/html/
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./.env:/usr/share/nginx/html/assets/.env:ro
     command: ["nginx", "-g", "daemon off;"]
-    environment:
-      - FLUTTER_ENV=dev
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://floraccess-app-web:80/ || exit 1"]
       interval: 600s
